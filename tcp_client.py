@@ -96,7 +96,7 @@ class Client:
                 return True
         return False
 
-    def build_request(self, resource, timestamp=None):
+    def build_request(self, resource, timestamp=None, type="GET", data=None):
         """
         Builds an HTTP GET request string.
 
@@ -107,11 +107,26 @@ class Client:
         Returns:
             str: The HTTP request as a string.
         """
-        request = f"GET {resource} HTTP/1.1\r\nHost: {self.server_ip}\r\n"
-        if timestamp:
-            request += f"If-Modified-Since: {timestamp}\r\n"
-        request += "\r\n"
-        return request
+        if type == "POST" and data != None: 
+            '''
+            POST /resource HTTP/1.1
+            Host: <server>
+            Content-Length: <length of data>
+            <data>
+            '''
+            request = f"POST {resource} HTTP/1.1\r\nHost: {self.server_ip}\r\n"
+            request += f"Content-Length: {len(data)}\r\n"
+            request += f"{data}\r\n"
+            print(f"\n****tcp_client build_request - POST request contents: {request}\n")
+            return request
+        else:
+            request = f"GET {resource} HTTP/1.1\r\nHost: {self.server_ip}\r\n"
+            if timestamp:
+                request += f"If-Modified-Since: {timestamp}\r\n"
+            request += "\r\n"
+            print(f"\n****tcp_client build_request - GET request contents: {request}\n")
+            return request
+
 
     def send_request_segments(self, request):
         """
@@ -120,6 +135,7 @@ class Client:
         Args:
             request (str): The full HTTP request string.
         """
+        print(f"\n****tcp_client send_request_segments right before encoding error for POST request - request: {request}\n")
         request_bytes = request.encode()
         max_data_length = self.frame_size - 60  # Assuming 60 bytes for headers
         segments = [request_bytes[i:i + max_data_length] for i in range(0, len(request_bytes), max_data_length)]
@@ -132,12 +148,15 @@ class Client:
             for segment in segments[self.base:min(len(segments), self.base + self.window_size)]:
                 if self.seq_num - init_seq_num == len(segments) - 1:
                     flags = 25  # Set the FIN flag on the last segment
+
+                print(f"send_request_segments - Sending: seq_num={self.seq_num}, ack_num={self.ack_num}, flags={flags}")
                 new_datagram = HTTPDatagram(
                     source_ip=self.client_ip, dest_ip=self.server_ip,
                     source_port=self.client_port, dest_port=self.server_port,
                     seq_num=self.seq_num, ack_num=self.ack_num,
                     flags=flags, window_size=self.window_size, next_hop=self.gateway, data=segment.decode()
                 )
+                print(f"Sending segment: seq_num={self.seq_num}, ack_num={self.ack_num}, flags={flags}")
                 self.client_socket.sendto(new_datagram.to_bytes(), (self.gateway, 0))
                 self.seq_num += 1
 
@@ -152,6 +171,7 @@ class Client:
                 datagram_fields = HTTPDatagram.from_bytes(frame)
                 # Confirm frame is meant for this application and is an ACK for the oldest sent packet
                 if (datagram_fields.next_hop == self.client_ip) and (datagram_fields.ip_saddr == self.server_ip) and (datagram_fields.flags == 16) and (datagram_fields.ack_num == self.base + init_seq_num + 1):
+                    print(f"Received ACK: seq_num={datagram_fields.seq_num}, ack_num={datagram_fields.ack_num}")
                     # send another segment (base + window_size) if necessary
                     if self.base + self.window_size < len(segments):
                         segment = segments[self.base + self.window_size]
@@ -177,12 +197,16 @@ class Client:
 
         while time.time() - start_time < 15 and flags not in [25, 17]:  # Stop if FIN or RST flags
             try:
+                print("now in try statement for process_response_segments")
                 frame = self.client_socket.recv(self.frame_size)
                 frame_bytes = IPHeader.from_bytes(frame)
                 if frame_bytes.ip_daddr == self.client_ip:
                     datagram_fields = HTTPDatagram.from_bytes(frame)
+                    print(f"datagram_fields in process_response_segments: {datagram_fields}")
                     if datagram_fields.next_hop == self.client_ip and datagram_fields.flags in [17, 24, 25]:
+                        print("now in if statement for datagram_fields.next_hop == self.client_ip and datagram_fields.flags in [17, 24, 25]")
                         if datagram_fields.seq_num == self.ack_num:
+                            print("now in if statement for datagram_fields.seq_num == self.ack_num")
                             self.ack_num += 1
                             response += datagram_fields.data
                             flags = datagram_fields.flags
@@ -194,6 +218,7 @@ class Client:
                             seq_num=self.seq_num, ack_num=self.ack_num,
                             flags=16, window_size=self.window_size, next_hop=self.gateway, data='ACK'
                         )
+                        print(f"ack in process_response_segments: {ack}")
                         self.client_socket.sendto(ack.to_bytes(), (self.gateway, 0))
             except Exception as e:
                 print(f'Error while receiving response: {e}')
@@ -206,7 +231,7 @@ class Client:
         """
         self.client_socket.close()
 
-    def request_resource(self, resource, timestamp=None):
+    def request_resource(self, resource, timestamp=None, type="GET", data=None):
         """
         Orchestrates the resource request process: handshake, request sending, and response processing.
 
@@ -217,16 +242,29 @@ class Client:
         Returns:
             str: The server's response.
         """
-        connection = self.initiate_handshake()
-        if connection:
-            request = self.build_request(resource, timestamp)
-            self.send_request_segments(request)
-            response = self.process_response_segments()
-            print(response)
-        else:
-            response = "Failed to connect to the server."
-        self.close_socket()
-        return response
+        if type == "POST":
+            connection = self.initiate_handshake()
+            if connection:
+                request = self.build_request(resource, timestamp, type, data)
+                print(f"???request_resrouce in tcp_client for POST request - request after build_request has been called: {request}")
+                self.send_request_segments(request)
+                response = self.process_response_segments()
+                print(f"request_resrouce in tcp_client for POST request - response: {response}")
+            else:
+                response = "Failed to connect to the server."
+            self.close_socket()
+            return response
+        else: 
+            connection = self.initiate_handshake()
+            if connection:
+                request = self.build_request(resource, timestamp)
+                self.send_request_segments(request)
+                response = self.process_response_segments()
+                print(f"request_resrouce in tcp_client for GET request - response: {response}")
+            else:
+                response = "Failed to connect to the server."
+            self.close_socket()
+            return response
 
 
 if __name__ == "__main__":

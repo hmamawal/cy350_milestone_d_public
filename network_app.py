@@ -62,19 +62,58 @@ class NetworkApp:
         self.web_client = Client()
         print('The web client is ready to send the request.')
 
-        # Client requests a resource from the server
-        self.web_client.request_resource('/index.html')
-        print('The web client has requested and received the resource.')
+        # input for choice of testing get or post
+        choice = input("Enter 'GET' or 'POST' to test the respective request: ")
+        #choice = 'post'
 
-        time.sleep(1)  # Allow routers and client to complete processing
+        if choice == 'GET' or choice == 'get':
 
-        # Ensure all router threads finish their tasks
-        for thread in router_threads:
-            thread.join()
+            # Client requests a resource from the server
+            self.web_client.request_resource('/index.html')
+            print('The web client has requested and received the resource.')
 
-        # Shut down the server and close sockets
-        self.web_server.close_server()
-        print('The network application is shutdown!')
+            time.sleep(1)  # Allow routers and client to complete processing
+
+            # Ensure all router threads finish their tasks
+            for thread in router_threads:
+                thread.join()
+
+            # Shut down the server and close sockets
+            self.web_server.close_server()
+            print('The network application is shutdown!')
+        elif choice == 'POST' or choice == 'post':
+
+            # Test POST request
+            print('Testing POST request...')
+            post_data = "This is a test POST request data."
+            post_response = self.web_client.request_resource('/new_resource.html', None,"POST", post_data)
+            print(f'POST Response:\n{post_response}')
+
+            # verify the POST request by making a GET request to the new resource
+            #print('Verifying POST by GET request to the new resource...')
+            #verify_response = self.web_client.request_resource('/new_resource.html')
+            #print(f'GET Response for New Resource:\n{verify_response}')
+
+            time.sleep(1)  # Allow routers and client to complete processing
+
+            # Ensure all router threads finish their tasks
+            for thread in router_threads:
+                thread.join()
+
+            # Shut down the server and close sockets
+            self.web_server.close_server()
+            print('The network application is shutdown!')
+        else:
+
+            time.sleep(1)  # Allow routers and client to complete processing
+
+            # Ensure all router threads finish their tasks
+            for thread in router_threads:
+                thread.join()
+
+            # Shut down the server and close sockets
+            self.web_server.close_server()
+            print('The network application is shutdown!')
 
 
 if __name__ == "__main__":
