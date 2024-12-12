@@ -1,0 +1,104 @@
+{
+    "/index.html": {
+        "last_modified": "Sun, 21 May 2023 07:28:00 GMT",
+        "file_size": 4096,
+        "etag": "abc123",
+        "data":"<!DOCTYPE html>\\n<html lang=\"en\">\\n<head>\\n    <meta charset=\"UTF-8\">\\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\\n    <title>Sample Page</title>\\n</head>\\n<body>\\n    <header>\\n        <h1>Welcome to My Sample Page</h1>\\n    </header>\\n    <main>\\n        <section>\\n            <h2>Introduction</h2>\\n            <p>This is a sample HTML file with enough text to exceed 1024 bytes. This file is used to demonstrate how HTML content can be included in a JSON object.</p>\\n            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum. Cras vehicula eros et quam egestas, id posuere est gravida. Suspendisse potenti. Duis malesuada, velit nec sollicitudin aliquet, sapien orci malesuada est, eget ullamcorper dolor elit nec lacus.</p>\\n            <p>Nulla facilisi. Phasellus id velit nec nisi suscipit fringilla. Aliquam erat volutpat. Integer vel erat in odio fringilla fermentum. Sed viverra dictum eros, a fermentum tortor commodo nec.</p>\\n        </section>\\n        <section>\\n            <h2>Content</h2>\\n            <p>This section contains more content to ensure that the HTML file is sufficiently large. Make sure that the content you add is meaningful and relevant to the page's purpose.</p>\\n            <p>Curabitur non malesuada dui, eu vestibulum erat. Integer imperdiet arcu nec purus tincidunt facilisis. Donec sed quam ut magna sollicitudin pretium vel sit amet nisi. Donec ac urna orci.</p>\\n        </section>\\n    </main>\\n    <footer>\\n        <p>&copy; 2024 My Sample Page. All rights reserved.</p>\\n    </footer>\\n</body>\\n</html>"        
+    },
+    "/about.html": {
+        "last_modified": "Mon, 22 May 2023 08:30:00 GMT",
+        "file_size": 90,
+        "etag": "def456",
+        "data": "The future belongs to those who believe in the beauty of their dreams. - Eleanor Roosevelt"
+    },
+    "/contact.html": {
+        "last_modified": "Tue, 23 May 2023 09:32:00 GMT",
+        "file_size": 115,
+        "etag": "ghi789",
+        "data": "In the end, we will remember not the words of our enemies, but the silence of our friends. - Martin Luther King Jr."
+    },
+    "/products.html": {
+        "last_modified": "Wed, 24 May 2023 10:34:00 GMT",
+        "file_size": 62,
+        "etag": "jkl012",
+        "data": "The best way to predict the future is to invent it. - Alan Kay"
+    },
+    "/services.html": {
+        "last_modified": "Thu, 25 May 2023 11:36:00 GMT",
+        "file_size": 66,
+        "etag": "mno345",
+        "data": "The only way to do great work is to love what you do. - Steve Jobs"
+    },
+    "/blog.html": {
+        "last_modified": "Fri, 26 May 2023 12:38:00 GMT",
+        "file_size": 378,
+        "etag": "pqr678",
+        "data": "We few, we happy few, we band of brothers;\n For he to-day that sheds his blood with me\n Shall be my brother; be he ne'er so vile,\n This day shall gentle his condition:\n And gentlemen in England now a-bed\n Shall think themselves accursed they were not here, \n And hold their manhoods cheap whiles any speaks\n That fought with us upon Saint Crispin's day. -- Shakespeare's Henry V"
+    },
+    "/post1.html": {
+        "last_modified": "Sat, 27 May 2023 13:40:00 GMT",
+        "file_size": 106,
+        "etag": "stu901",
+        "data": "The greatest glory in living lies not in never falling, but in rising every time we fall. - Nelson Mandela"
+    },
+    "/post2.html": {
+        "last_modified": "Sun, 28 May 2023 14:42:00 GMT",
+        "file_size": 72,
+        "etag": "vwx234",
+        "data": "The way to get started is to quit talking and begin doing. - Walt Disney"
+    },
+    "/post3.html": {
+        "last_modified": "Mon, 29 May 2023 15:44:00 GMT",
+        "file_size": 77,
+        "etag": "yz567",
+        "data": "Your time is limited, don't waste it living someone else's life. - Steve Jobs"
+    },
+    "/portfolio.html": {
+        "last_modified": "Tue, 30 May 2023 16:46:00 GMT",
+        "file_size": 94,
+        "etag": "abc678",
+        "data": "If life were predictable it would cease to be life, and be without flavor. - Eleanor Roosevelt"
+    },
+    "/team.html": {
+        "last_modified": "Thu, 01 Jun 2023 17:48:00 GMT",
+        "file_size": 148,
+        "etag": "def901",
+        "data": "If you look at what you have in life, you'll always have more. If you look at what you don't have in life, you'll never have enough. - Oprah Winfrey"
+    },
+    "/careers.html": {
+        "last_modified": "Fri, 02 Jun 2023 18:50:00 GMT",
+        "file_size": 93,
+        "etag": "ghi234",
+        "data": "Remember that not getting what you want is sometimes a wonderful stroke of luck. - Dalai Lama"
+    },
+    "/privacy.html": {
+        "last_modified": "Sat, 03 Jun 2023 19:52:00 GMT",
+        "file_size": 53,
+        "etag": "jkl567",
+        "data": "The purpose of our lives is to be happy. - Dalai Lama"
+    },
+    "/terms.html": {
+        "last_modified": "Sun, 04 Jun 2023 20:54:00 GMT",
+        "file_size": 71,
+        "etag": "mno890",
+        "data": "Life is what happens when you're busy making other plans. - John Lennon"
+    },
+    "/faq.html": {
+        "last_modified": "Mon, 05 Jun 2023 21:56:00 GMT",
+        "file_size": 49,
+        "etag": "pqr123",
+        "data": "Get busy living or get busy dying. - Stephen King"
+    },
+    "/testimonials.html": {
+        "last_modified": "Tue, 06 Jun 2023 22:58:00 GMT",
+        "file_size": 1462,
+        "etag": "stu456",
+        "data": "Four score and seven years ago our fathers brought forth, on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal. Now we are engaged in a great civil war, testing whether that nation, or any nation so conceived and so dedicated, can long endure. We are met on a great battle-field of that war. We have come to dedicate a portion of that field, as a final resting place for those who here gave their lives that that nation might live. It is altogether fitting and proper that we should do this. But, in a larger sense, we can not dedicate, we can not consecrate, we can not hallow, this ground. The brave men, living and dead, who struggled here, have consecrated it, far above our poor power to add or detract. The world will little note, nor long remember what we say here, but it can never forget what they did here. It is for us the living, rather, to be dedicated here to the unfinished work which they who fought here have thus far so nobly advanced. It is rather for us to be here dedicated to the great task remaining before us, that from these honored dead we take increased devotion to that cause for which they gave the last full measure of devotion\u00e2\u20ac\u201dthat we here highly resolve that these dead shall not have died in vain\u00e2\u20ac\u201dthat this nation, under God, shall have a new birth of freedom, and that government of the people, by the people, for the people, shall not perish from the earth."
+    },
+    "/case-study.html": {
+        "last_modified": "Wed, 07 Jun 2023 23:00:00 GMT",
+        "file_size": 62,
+        "etag": "vwx789",
+        "data": "Believe you can and you're halfway there. - Theodore Roosevelt"
+    }
+}
