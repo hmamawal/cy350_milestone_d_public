@@ -236,8 +236,8 @@ class Server:
                     #content_length = int(line.split(":", 1)[1].strip())
                     #break
 
-            resource_info = self.resources[resource]
             if modified_since:
+                resource_info = self.resources[resource]
                 modified_since_time = datetime.strptime(modified_since, "%a, %d %b %Y %H:%M:%S GMT")
                 last_modified_time = datetime.strptime(resource_info['last_modified'], "%a, %d %b %Y %H:%M:%S GMT")
                 if last_modified_time <= modified_since_time:
@@ -246,7 +246,7 @@ class Server:
                     data = f"HTTP/1.1 200 OK\r\nContent-Length: {len(resource_info['data'])}\r\n\r\n" + resource_info['data']
                     flags = 24 # Set ACK and PSH flags for valid response
             elif method == "POST":
-                data += f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nPOST request successfully received."
+                data = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nPOST request successfully received."
                 flags = 24
                 post_content += request_lines[-1]
                 new_resource = {

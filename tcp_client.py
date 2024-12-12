@@ -117,6 +117,7 @@ class Client:
             request = f"POST {resource} HTTP/1.1\r\nHost: {self.server_ip}\r\n"
             request += f"Content-Length: {len(data)}\r\n"
             request += f"{data}\r\n"
+            request += "\r\n"
             print(f"\n****tcp_client build_request - POST request contents: {request}\n")
             return request
         else:
