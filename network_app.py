@@ -89,10 +89,10 @@ class NetworkApp:
             post_response = self.web_client.request_resource('/new_resource.html', None,"POST", post_data)
             print(f'POST Response:\n{post_response}')
 
-            # verify the POST request by making a GET request to the new resource
+            # Verify the POST request by making a GET request to the new resource
             #print('Verifying POST by GET request to the new resource...')
-            #verify_response = self.web_client.request_resource('/new_resource.html')
-            #print(f'GET Response for New Resource:\n{verify_response}')
+            #self.web_client.request_resource('/new_resource.html')
+            #print('The web client has requested and received the resource.')
 
             time.sleep(1)  # Allow routers and client to complete processing
 
