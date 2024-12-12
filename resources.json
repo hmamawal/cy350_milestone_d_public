@@ -3,7 +3,7 @@
         "last_modified": "Sun, 21 May 2023 07:28:00 GMT",
         "file_size": 4096,
         "etag": "abc123",
-        "data":"<!DOCTYPE html>\\n<html lang=\"en\">\\n<head>\\n    <meta charset=\"UTF-8\">\\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\\n    <title>Sample Page</title>\\n</head>\\n<body>\\n    <header>\\n        <h1>Welcome to My Sample Page</h1>\\n    </header>\\n    <main>\\n        <section>\\n            <h2>Introduction</h2>\\n            <p>This is a sample HTML file with enough text to exceed 1024 bytes. This file is used to demonstrate how HTML content can be included in a JSON object.</p>\\n            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum. Cras vehicula eros et quam egestas, id posuere est gravida. Suspendisse potenti. Duis malesuada, velit nec sollicitudin aliquet, sapien orci malesuada est, eget ullamcorper dolor elit nec lacus.</p>\\n            <p>Nulla facilisi. Phasellus id velit nec nisi suscipit fringilla. Aliquam erat volutpat. Integer vel erat in odio fringilla fermentum. Sed viverra dictum eros, a fermentum tortor commodo nec.</p>\\n        </section>\\n        <section>\\n            <h2>Content</h2>\\n            <p>This section contains more content to ensure that the HTML file is sufficiently large. Make sure that the content you add is meaningful and relevant to the page's purpose.</p>\\n            <p>Curabitur non malesuada dui, eu vestibulum erat. Integer imperdiet arcu nec purus tincidunt facilisis. Donec sed quam ut magna sollicitudin pretium vel sit amet nisi. Donec ac urna orci.</p>\\n        </section>\\n    </main>\\n    <footer>\\n        <p>&copy; 2024 My Sample Page. All rights reserved.</p>\\n    </footer>\\n</body>\\n</html>"        
+        "data": "<!DOCTYPE html>\\n<html lang=\"en\">\\n<head>\\n    <meta charset=\"UTF-8\">\\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\\n    <title>Sample Page</title>\\n</head>\\n<body>\\n    <header>\\n        <h1>Welcome to My Sample Page</h1>\\n    </header>\\n    <main>\\n        <section>\\n            <h2>Introduction</h2>\\n            <p>This is a sample HTML file with enough text to exceed 1024 bytes. This file is used to demonstrate how HTML content can be included in a JSON object.</p>\\n            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum. Cras vehicula eros et quam egestas, id posuere est gravida. Suspendisse potenti. Duis malesuada, velit nec sollicitudin aliquet, sapien orci malesuada est, eget ullamcorper dolor elit nec lacus.</p>\\n            <p>Nulla facilisi. Phasellus id velit nec nisi suscipit fringilla. Aliquam erat volutpat. Integer vel erat in odio fringilla fermentum. Sed viverra dictum eros, a fermentum tortor commodo nec.</p>\\n        </section>\\n        <section>\\n            <h2>Content</h2>\\n            <p>This section contains more content to ensure that the HTML file is sufficiently large. Make sure that the content you add is meaningful and relevant to the page's purpose.</p>\\n            <p>Curabitur non malesuada dui, eu vestibulum erat. Integer imperdiet arcu nec purus tincidunt facilisis. Donec sed quam ut magna sollicitudin pretium vel sit amet nisi. Donec ac urna orci.</p>\\n        </section>\\n    </main>\\n    <footer>\\n        <p>&copy; 2024 My Sample Page. All rights reserved.</p>\\n    </footer>\\n</body>\\n</html>"
     },
     "/about.html": {
         "last_modified": "Mon, 22 May 2023 08:30:00 GMT",
@@ -100,5 +100,11 @@
         "file_size": 62,
         "etag": "vwx789",
         "data": "Believe you can and you're halfway there. - Theodore Roosevelt"
+    },
+    "/new_resource.html": {
+        "last_modified": "Thu, 12 Dec 2024 11:34:30 GMT",
+        "file_size": 0,
+        "etag": "eno866",
+        "data": ""
     }
 }
