@@ -135,6 +135,7 @@ class Server:
                     )
                     print(f"receive_request_segments in tcp_server - ack: {ack}, datagram_fields.seq_num: {datagram_fields.seq_num}, self.ack_num: {self.ack_num}")
                     self.server_socket.sendto(ack.to_bytes(), (self.gateway, 0))
+        print("full request received")
 
         return request, datagram_fields.source_port, datagram_fields.ip_saddr
     
@@ -210,10 +211,13 @@ class Server:
         resource = first_line[1]
         print(f"resource: {resource}")
 
+        
+
         # ensure that if a POST request is made to a resource that exists in the resources.json file, a different resource name is given so that a POST request can still go through.
         if resource in self.resources and method == "POST":
             print(f"resource exists in resources.json file")
             resource = '/new_resource.html'
+        
 
         modified_since = None
 
@@ -250,13 +254,15 @@ class Server:
                 data = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nPOST request successfully received."
                 data += "\r\n\r\n"
                 flags = 24
-                post_content += request_lines[-1]
+                post_content += request_lines[3]
                 new_resource = {
                     "last_modified": datetime.now().strftime("%a, %d %b %Y %H:%M:%S GMT"),
                     "file_size": len(post_content),
                     "etag":self.newRandomETag(),
                     "data": post_content
                 }
+
+                print(f"MAJ HASKINS3: TCP_SERVER, PROCESS_REQUEST, HANDLING POST, POST_CONTENT: {post_content}")
 
                 # add the post content to the resources.json file (should be a new entry into the dictionary)
                 self.resources[resource] = new_resource
@@ -271,6 +277,7 @@ class Server:
                     print(f"!!!resource not added to resources.json file")
                 
             else:
+                resource_info = self.resources[resource]
                 data = f"HTTP/1.1 200 OK\r\nContent-Length: {len(resource_info['data'])}\r\n\r\n" + resource_info['data']
                 flags = 24  # Set ACK and PSH flags for valid response
         # Send the response in segments using Go-Back-N

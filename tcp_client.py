@@ -256,8 +256,10 @@ class Client:
             self.close_socket()
             return response
         else: 
+            print("MAJ HASKINS: checking with get inside request_resource inside tcp_client")
             connection = self.initiate_handshake()
             if connection:
+                print("MAJ HASKINS2: checking with connection inside get block inside request_resource inside tcp_client")
                 request = self.build_request(resource, timestamp)
                 self.send_request_segments(request)
                 response = self.process_response_segments()

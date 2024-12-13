@@ -37,6 +37,7 @@ class NetworkApp:
         self.web_server = Server()
         self.svr_thread = threading.Thread(target=self.web_server.run_server)
         self.svr_thread.start()
+
         print('The web server is running!')
 
     def run_app(self):
@@ -55,7 +56,7 @@ class NetworkApp:
         for router in self.routers:
             router.send_initial_lsa()
 
-        time.sleep(15)  # Allow routers time to exchange LSAs and update their forwarding tables
+        time.sleep(10)  # Allow routers time to exchange LSAs and update their forwarding tables
         print('Routers are ready.')
 
         # Create and run the client
@@ -89,7 +90,10 @@ class NetworkApp:
             post_response = self.web_client.request_resource('/new_resource.html', None,"POST", post_data)
             print(f'POST Response:\n{post_response}')
 
+            #time.sleep(15)
+
             # Verify the POST request by making a GET request to the new resource
+            # BEFORE RUNNING AGAIN, ENSURE SOCKET WASTN'T CLOSED OR REINITIATE THE SOCKET
             #print('Verifying POST by GET request to the new resource...')
             #self.web_client.request_resource('/new_resource.html')
             #print('The web client has requested and received the resource.')
