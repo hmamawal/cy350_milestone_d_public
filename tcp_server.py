@@ -23,7 +23,7 @@ class Server:
         ack_num (int): Current acknowledgment number.
     """
 
-    def __init__(self, server_ip='127.128.0.1', gateway='127.128.0.254', server_port=8080, frame_size=1024, window_size=4, timeout=5):
+    def __init__(self, server_ip='127.128.0.1', gateway='127.128.0.254', server_port=8080, frame_size=200, window_size=4, timeout=1):
         """
         Initializes the server with IP address, gateway, port, and network settings.
 
@@ -288,7 +288,9 @@ class Server:
             segments = [response_bytes[i:i + max_data_length] for i in range(0, len(response_bytes), max_data_length)]
         
             init_seq_num = self.seq_num
+            print(f"\n***SERVER: number of setments: {len(segments)}***\n")
             while self.base < len(segments):
+                print(f"SERVER: Self.base: {self.base} and len(segments): {len(segments)}")
                 for segment in segments[self.base:min(len(segments), self.base + self.window_size)]:
                     if self.seq_num - init_seq_num == len(segments) - 1 and flags == 24:
                         flags = 25  # Set FIN flag on the last segment  
@@ -298,12 +300,16 @@ class Server:
                         seq_num=self.seq_num, ack_num=self.ack_num, flags=flags,
                         window_size=self.window_size, next_hop=self.gateway, data=segment.decode()
                     )
+                    print(f"\n****SERVER: about to send self.seq_num = {self.seq_num} ****\n")
                     self.server_socket.sendto(new_datagram.to_bytes(), (self.gateway, 0))
                     self.seq_num += 1
 
                 # Process acknowledgments
                 while self.base < len(segments):
                     try:
+                        print("*****SERVER: Listening for acknowledgement")
+                        print(f"*****SERVER: Timeout is set to: {self.server_socket.gettimeout()}")
+                        self.server_socket.settimeout(self.timeout)
                         frame = self.server_socket.recv(self.frame_size)
                     except socket.timeout:
                         self.seq_num = self.base + init_seq_num  # Retransmit on timeout
@@ -311,21 +317,33 @@ class Server:
 
                     datagram_fields = HTTPDatagram.from_bytes(frame)
                     # Confirm frame is meant for this application and is an ACK for the oldest sent packet
-                    if (datagram_fields.next_hop == self.server_ip) and (datagram_fields.ip_saddr == dest_ip) and (datagram_fields.flags == 16) and (datagram_fields.ack_num == self.base + init_seq_num + 1):
+                    print(f"\n ****SERVER: range that i'm checking: {range(self.base + init_seq_num + 1, self.base + init_seq_num + self.window_size+1)}****")
+                    print(f"SERVER: Packet received with ACK num: {datagram_fields.ack_num}")
+                    print(f"SERVER: Valid ACK nums are in this range: {list(range(self.base + init_seq_num + 1, self.base + init_seq_num + self.window_size+1))}")
+                    print((datagram_fields.next_hop == self.server_ip), (datagram_fields.ip_saddr == dest_ip), (datagram_fields.flags == 16), (datagram_fields.ack_num in range(self.base + init_seq_num + 1, self.base + init_seq_num + self.window_size+1)))
+                    print(datagram_fields.next_hop)
+                    #if (datagram_fields.next_hop == self.server_ip) and (datagram_fields.ip_saddr == dest_ip) and (datagram_fields.flags == 16) and (datagram_fields.ack_num in range(self.base + init_seq_num + 1, self.base + init_seq_num + self.window_size+1)):
+                    if (datagram_fields.ip_saddr == dest_ip) and (datagram_fields.flags == 16) and (datagram_fields.ack_num in range(self.base + init_seq_num + 1, self.base + init_seq_num + self.window_size+1)):
+                    
                         # send another segment (base + window_size) if necessary
                         if self.base + self.window_size < len(segments):
                             segment = segments[self.base + self.window_size]
                             if self.base == min(len(segments), self.base + self.window_size) - 1 and flags == 24:
                                 flags = 25
                             new_datagram = HTTPDatagram(source_ip=self.server_ip, dest_ip=dest_ip, source_port=self.server_port, dest_port=dest_port, seq_num=self.seq_num, ack_num=self.ack_num, flags=flags, window_size=self.window_size, next_hop=self.gateway, data=segment.decode())
+                            print(f"\n????SERVER: what i'm sending now - self.seq_num: {self.seq_num}\n")
                             datagram_bytes = new_datagram.to_bytes()
                             self.server_socket.sendto(datagram_bytes, (self.gateway, 0))
                             self.seq_num += 1
                         # increment base
-                        self.base += 1
+                        # update the base - this will become the latest acknowledgement number
+                        print(f"\n ****SERVER: self.base before being modified: self.base: {self.base} *****\n")
+                        self.base += (datagram_fields.ack_num-self.base-1) 
+                        print(f"\n ****SERVER: range that i'm checking - self.seq_num: {self.seq_num} and self.base: {self.base} *****")
                     
         except Exception as e:
             print(f'Error while sending response: {e}')
+            
 
     def reset_connection(self):
         """
