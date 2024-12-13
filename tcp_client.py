@@ -4,6 +4,7 @@ import time
 import threading
 from datetime import datetime
 from pdu import HTTPDatagram, IPHeader
+from network_app import get_key_value
 
 class Client:
     """
@@ -53,6 +54,8 @@ class Client:
         self.base = 0
         self.seq_num = 0
         self.ack_num = 0
+
+        self.f = get_key_value()
 
     def initiate_handshake(self):
         """
@@ -199,10 +202,10 @@ class Client:
         while time.time() - start_time < 15 and flags not in [25, 17]:  # Stop if FIN or RST flags
             try:
                 print("now in try statement for process_response_segments")
-                frame = self.client_socket.recv(self.frame_size)
+                frame = self.f.dycrypt(self.client_socket.recv(self.frame_size))
                 frame_bytes = IPHeader.from_bytes(frame)
                 if frame_bytes.ip_daddr == self.client_ip:
-                    datagram_fields = HTTPDatagram.from_bytes(frame)
+                    datagram_fields = self.f.dycrypt(HTTPDatagram.from_bytes(frame))
                     print(f"datagram_fields in process_response_segments: {datagram_fields}")
                     if datagram_fields.next_hop == self.client_ip and datagram_fields.flags in [17, 24, 25]:
                         print("now in if statement for datagram_fields.next_hop == self.client_ip and datagram_fields.flags in [17, 24, 25]")

@@ -3,6 +3,9 @@ import time
 from tcp_client import Client
 from router import Router
 from tcp_server import Server
+# Fernet module is imported from the 
+# cryptography package 
+from cryptography.fernet import Fernet 
 
 class NetworkApp:
     """
@@ -37,7 +40,15 @@ class NetworkApp:
         self.web_server = Server()
         self.svr_thread = threading.Thread(target=self.web_server.run_server)
         self.svr_thread.start()
+
+        # Generate a symmetric key for encryption
+        self.crypto_key = Fernet.generate_key()
+        # Create a Fernet instance for encryption and decryption
+        self.f = Fernet(self.crypto_key)
         print('The web server is running!')
+
+    def get_key_value(self):
+        return self.crypto_key
 
     def run_app(self):
         """

@@ -4,6 +4,7 @@ from pdu import HTTPDatagram, IPHeader
 from pathlib import Path
 from datetime import datetime
 from random import choices
+from network_app import get_key_value
 
 class Server:
     """
@@ -54,6 +55,8 @@ class Server:
         self.resources_path = self.base_path / 'resources.json'
         with open(self.resources_path, 'r') as f:
             self.resources = json.load(f)
+
+        self.f = get_key_value()
 
     def accept_handshake(self):
         """
@@ -311,7 +314,7 @@ class Server:
                             if self.base == min(len(segments), self.base + self.window_size) - 1 and flags == 24:
                                 flags = 25
                             new_datagram = HTTPDatagram(source_ip=self.server_ip, dest_ip=dest_ip, source_port=self.server_port, dest_port=dest_port, seq_num=self.seq_num, ack_num=self.ack_num, flags=flags, window_size=self.window_size, next_hop=self.gateway, data=segment.decode())
-                            datagram_bytes = new_datagram.to_bytes()
+                            datagram_bytes = self.f.encrypt(new_datagram.to_bytes())
                             self.server_socket.sendto(datagram_bytes, (self.gateway, 0))
                             self.seq_num += 1
                         # increment base
