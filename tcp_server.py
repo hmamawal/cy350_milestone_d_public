@@ -210,6 +210,7 @@ class Server:
         resource = first_line[1]
         print(f"resource: {resource}")
 
+        # ensure that if a POST request is made to a resource that exists in the resources.json file, a different resource name is given so that a POST request can still go through.
         if resource in self.resources and method == "POST":
             print(f"resource exists in resources.json file")
             resource = '/new_resource.html'
