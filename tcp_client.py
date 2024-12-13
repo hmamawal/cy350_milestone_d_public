@@ -241,8 +241,9 @@ class Client:
                         # 2. add the data from each segment to the response, removing the segment from the dictionary after it's added
                         for key in sd:
                             response += sd[key]
-                            del segment_dict[key] # i find `del` from this source: https://www.geeksforgeeks.org/python-ways-to-remove-a-key-from-dictionary/
+                            del segment_dict[key] # i found `del` from this source: https://www.geeksforgeeks.org/python-ways-to-remove-a-key-from-dictionary/
                         # 3. update the cumulative acknowledgement number (expected sequence number)
+                        # ensure with if statement its the next expected thing then you can update cum_ack by that x amount
                         cumulative_ack += 1
 
                         # Send ACK
