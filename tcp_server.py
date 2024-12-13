@@ -247,6 +247,7 @@ class Server:
                     flags = 24 # Set ACK and PSH flags for valid response
             elif method == "POST":
                 data = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nPOST request successfully received."
+                data += "\r\n\r\n"
                 flags = 24
                 post_content += request_lines[-1]
                 new_resource = {
