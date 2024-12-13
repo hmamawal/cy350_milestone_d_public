@@ -196,21 +196,54 @@ class Client:
         response = ''
         flags = 24
 
+        # for impplementing the Go-Back-N protocol with cumulative acknowledgements according to this youtube video - https://www.youtube.com/watch?v=TBii-a0XY3o&t=26s:
+        # 1. store each segment of data in a buffer
+        # 2. keep a cumulative acknowledgement number that is sent back to the server each time a new segment is received
+        #   - if an acknowledgement that is sent back to the sender every time a segment is successfully received is lost, 
+        #     it's ok because the cumulative acknowledgement number will keep building, and eventually when this acknolwedgement 
+        #     is received, the sender will know that all segments up to that point have been received, it will match the 
+        #     accumulative number that the server has, which will signal to the sender that everything sent before was successful even though it didn't receive all the acknowledgements
+        # 3. there will be a timeout window as well that will deal with retransmitting segments starting with the first one that 
+        #    was not acknowledged. 
+
+        # dictionary for storing segments (originally i had a list and i was going to access by index but i realized the 
+        # sequence numbers accociated with certain segments could be numbers that are way differnt from 0,1,2,etc)
+        segment_dict = {}
+        # cumulative acknowledgement number
+        cumulative_ack = self.ack_num # a.k.a. the expected sequence number
+
         while time.time() - start_time < 15 and flags not in [25, 17]:  # Stop if FIN or RST flags
             try:
                 print("now in try statement for process_response_segments")
                 frame = self.client_socket.recv(self.frame_size)
                 frame_bytes = IPHeader.from_bytes(frame)
-                if frame_bytes.ip_daddr == self.client_ip:
+                if frame_bytes.ip_daddr == self.client_ip: # Check if the frame is meant for this device / ip address
                     datagram_fields = HTTPDatagram.from_bytes(frame)
                     print(f"datagram_fields in process_response_segments: {datagram_fields}")
-                    if datagram_fields.next_hop == self.client_ip and datagram_fields.flags in [17, 24, 25]:
+                    if datagram_fields.next_hop == self.client_ip and datagram_fields.flags in [17, 24, 25]: # next hop means the client ip address is going to handle the packet on its way to the final destination
                         print("now in if statement for datagram_fields.next_hop == self.client_ip and datagram_fields.flags in [17, 24, 25]")
-                        if datagram_fields.seq_num == self.ack_num:
-                            print("now in if statement for datagram_fields.seq_num == self.ack_num")
-                            self.ack_num += 1
-                            response += datagram_fields.data
-                            flags = datagram_fields.flags
+                        #if datagram_fields.seq_num == self.ack_num:
+                        #print("now in if statement for datagram_fields.seq_num == self.ack_num")
+                        #self.ack_num += 1
+                        #response += datagram_fields.data
+                        flags = datagram_fields.flags
+                        seq_num = datagram_fields.seq_num
+                        data = datagram_fields.data
+
+                        # for each segment received, store in dictionary
+                        segment_dict[seq_num] = data
+
+                        # build the response with consecutive segments (segments added to the dictionary in order of sequence number)
+                        # 1. sort the dictionary by key (sequence number) - following three lines from https://www.geeksforgeeks.org/python-sort-python-dictionaries-by-key-or-value/
+                        myKeys = list(segment_dict.keys())
+                        myKeys.sort()
+                        sd = {i: segment_dict[i] for i in myKeys} # Sorted Dictionary
+                        # 2. add the data from each segment to the response, removing the segment from the dictionary after it's added
+                        for key in sd:
+                            response += sd[key]
+                            del segment_dict[key] # i find `del` from this source: https://www.geeksforgeeks.org/python-ways-to-remove-a-key-from-dictionary/
+                        # 3. update the cumulative acknowledgement number (expected sequence number)
+                        cumulative_ack += 1
 
                         # Send ACK
                         ack = HTTPDatagram(

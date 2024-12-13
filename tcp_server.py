@@ -210,7 +210,6 @@ class Server:
         resource = first_line[1]
         print(f"resource: {resource}")
 
-        # ensure that if a POST request is made to a resource that exists in the resources.json file, a different resource name is given so that a POST request can still go through.
         if resource in self.resources and method == "POST":
             print(f"resource exists in resources.json file")
             resource = '/new_resource.html'
@@ -295,27 +294,34 @@ class Server:
                     self.seq_num += 1
 
                 # Process acknowledgments
-                while self.base < len(segments):
-                    try:
-                        frame = self.server_socket.recv(self.frame_size)
-                    except socket.timeout:
-                        self.seq_num = self.base + init_seq_num  # Retransmit on timeout
-                        break
-
-                    datagram_fields = HTTPDatagram.from_bytes(frame)
-                    # Confirm frame is meant for this application and is an ACK for the oldest sent packet
-                    if (datagram_fields.next_hop == self.server_ip) and (datagram_fields.ip_saddr == dest_ip) and (datagram_fields.flags == 16) and (datagram_fields.ack_num == self.base + init_seq_num + 1):
-                        # send another segment (base + window_size) if necessary
-                        if self.base + self.window_size < len(segments):
-                            segment = segments[self.base + self.window_size]
-                            if self.base == min(len(segments), self.base + self.window_size) - 1 and flags == 24:
-                                flags = 25
-                            new_datagram = HTTPDatagram(source_ip=self.server_ip, dest_ip=dest_ip, source_port=self.server_port, dest_port=dest_port, seq_num=self.seq_num, ack_num=self.ack_num, flags=flags, window_size=self.window_size, next_hop=self.gateway, data=segment.decode())
-                            datagram_bytes = new_datagram.to_bytes()
-                            self.server_socket.sendto(datagram_bytes, (self.gateway, 0))
-                            self.seq_num += 1
-                        # increment base
-                        self.base += 1
+                self.server_socket.settimeout(16) # setting to 16 seconds because the client side is set to 15 seconds
+                try: 
+                    while self.base < len(segments):
+                        try: 
+                            frame = self.server_socket.recv(self.frame_size)
+                            datagram_fields = HTTPDatagram.from_bytes(frame)
+                            # Confirm frame is meant for this application
+                            if (datagram_fields.next_hop == self.server_ip) and (datagram_fields.ip_saddr == dest_ip) and (datagram_fields.flags == 16):
+                                # check and make sure the received cumulative ack is equal to the expected ack (i.e. the current sequence number)
+                                # if it is, increment the base by 1
+                                # if it is not, no worries, just continue
+                                if datagram_fields.ack_num == self.seq_num:
+                                    self.base += 1
+                        except:
+                            #continue
+                            # send another segment (base + window_size)
+                            if self.base + self.window_size < len(segments):
+                                segment = segments[self.base + self.window_size]
+                                if self.base == min(len(segments), self.base + self.window_size) - 1 and flags == 24:
+                                    flags = 25
+                                new_datagram = HTTPDatagram(source_ip=self.server_ip, dest_ip=dest_ip, source_port=self.server_port, dest_port=dest_port, seq_num=self.seq_num, ack_num=self.ack_num, flags=flags, window_size=self.window_size, next_hop=self.gateway, data=segment.decode())
+                                datagram_bytes = new_datagram.to_bytes()
+                                self.server_socket.sendto(datagram_bytes, (self.gateway, 0))
+                                self.seq_num += 1
+                            # increment base
+                            self.base += 1
+                except socket.timeout:
+                    self.seq_num = self.base + init_seq_num  # Retransmit on timeout
                     
         except Exception as e:
             print(f'Error while sending response: {e}')
