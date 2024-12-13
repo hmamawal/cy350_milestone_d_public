@@ -4,6 +4,8 @@ import time
 import threading
 from datetime import datetime
 from pdu import HTTPDatagram, IPHeader
+from cryptography.fernet import Fernet
+from cryptographyCY350 import get_key_value
 
 class Client:
     """
@@ -23,7 +25,7 @@ class Client:
         ack_num (int): Current acknowledgment number.
     """
 
-    def __init__(self, client_ip='127.0.0.1', server_ip='127.128.0.1', gateway='127.0.0.254', server_port=8080, frame_size=200, window_size=5, timeout=1):
+    def __init__(self, client_ip='127.0.0.1', server_ip='127.128.0.1', gateway='127.0.0.254', server_port=8080, frame_size=2048, window_size=5, timeout=1):
         """
         Initializes the client with given IP addresses, ports, and network settings.
 
@@ -53,6 +55,8 @@ class Client:
         self.base = 0
         self.seq_num = 0
         self.ack_num = 0
+
+        self.f = get_key_value()
 
     def initiate_handshake(self):
         """
@@ -215,7 +219,9 @@ class Client:
                                 print(f"CLIENT: datagram_fields.seq_num:{datagram_fields.seq_num} and self.ack_num: {self.ack_num}")
                                 self.ack_num += 1
                                 print(f"CLIENT: after adding to self.ack_num: {self.ack_num}")
-                                response += datagram_fields.data
+                                response += self.f.decrypt((datagram_fields.data.encode()))
+                                print(f"\n!!!!!!CLIENT: after receiving encrypted data and decrypting: {self.f.decrypt((datagram_fields.data.encode()))}")
+                                print(f"!!!!!!\nCLIENT: after adding to self.ack_num: {datagram_fields.data}\n")
                                 flags = datagram_fields.flags
 
                             # Send ACK

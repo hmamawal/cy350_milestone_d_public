@@ -4,6 +4,8 @@ from pdu import HTTPDatagram, IPHeader
 from pathlib import Path
 from datetime import datetime
 from random import choices
+from cryptography.fernet import Fernet
+from cryptographyCY350 import get_key_value
 
 class Server:
     """
@@ -23,7 +25,7 @@ class Server:
         ack_num (int): Current acknowledgment number.
     """
 
-    def __init__(self, server_ip='127.128.0.1', gateway='127.128.0.254', server_port=8080, frame_size=200, window_size=4, timeout=1):
+    def __init__(self, server_ip='127.128.0.1', gateway='127.128.0.254', server_port=8080, frame_size=2048, window_size=4, timeout=1):
         """
         Initializes the server with IP address, gateway, port, and network settings.
 
@@ -54,6 +56,8 @@ class Server:
         self.resources_path = self.base_path / 'resources.json'
         with open(self.resources_path, 'r') as f:
             self.resources = json.load(f)
+        
+        self.f = get_key_value()
 
     def accept_handshake(self):
         """
@@ -330,7 +334,8 @@ class Server:
                             segment = segments[self.base + self.window_size]
                             if self.base == min(len(segments), self.base + self.window_size) - 1 and flags == 24:
                                 flags = 25
-                            new_datagram = HTTPDatagram(source_ip=self.server_ip, dest_ip=dest_ip, source_port=self.server_port, dest_port=dest_port, seq_num=self.seq_num, ack_num=self.ack_num, flags=flags, window_size=self.window_size, next_hop=self.gateway, data=segment.decode())
+                            new_datagram = HTTPDatagram(source_ip=self.server_ip, dest_ip=dest_ip, source_port=self.server_port, dest_port=dest_port, seq_num=self.seq_num, ack_num=self.ack_num, flags=flags, window_size=self.window_size, next_hop=self.gateway, data=self.f.encrypt(segment).decode())
+                            print(f"\n!!!!!!!SERVER: AFTER ENCRYPTION: {self.f.encrypt(segment).decode()}")
                             print(f"\n????SERVER: what i'm sending now - self.seq_num: {self.seq_num}\n")
                             datagram_bytes = new_datagram.to_bytes()
                             self.server_socket.sendto(datagram_bytes, (self.gateway, 0))
