@@ -73,7 +73,7 @@ class NetworkApp:
             self.web_client.request_resource('/index.html')
             print('The web client has requested and received the resource.')
 
-            time.sleep(1)  # Allow routers and client to complete processing
+            time.sleep(60)  # Allow routers and client to complete processing
 
             # Ensure all router threads finish their tasks
             for thread in router_threads:

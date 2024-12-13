@@ -4,6 +4,8 @@ import time
 import threading
 from datetime import datetime
 from pdu import HTTPDatagram, IPHeader
+from cryptography.fernet import Fernet
+from cryptographyCY350 import get_key_value
 
 class Client:
     """
@@ -23,7 +25,7 @@ class Client:
         ack_num (int): Current acknowledgment number.
     """
 
-    def __init__(self, client_ip='127.0.0.1', server_ip='127.128.0.1', gateway='127.0.0.254', server_port=8080, frame_size=1024, window_size=5, timeout=5):
+    def __init__(self, client_ip='127.0.0.1', server_ip='127.128.0.1', gateway='127.0.0.254', server_port=8080, frame_size=2048, window_size=5, timeout=1):
         """
         Initializes the client with given IP addresses, ports, and network settings.
 
@@ -53,6 +55,8 @@ class Client:
         self.base = 0
         self.seq_num = 0
         self.ack_num = 0
+
+        self.f = get_key_value()
 
     def initiate_handshake(self):
         """
@@ -172,7 +176,7 @@ class Client:
                 datagram_fields = HTTPDatagram.from_bytes(frame)
                 # Confirm frame is meant for this application and is an ACK for the oldest sent packet
                 if (datagram_fields.next_hop == self.client_ip) and (datagram_fields.ip_saddr == self.server_ip) and (datagram_fields.flags == 16) and (datagram_fields.ack_num == self.base + init_seq_num + 1):
-                    print(f"Received ACK: seq_num={datagram_fields.seq_num}, ack_num={datagram_fields.ack_num}")
+                    print(f"CLIENT: send_request_segments: Received ACK: seq_num={datagram_fields.seq_num}, ack_num={datagram_fields.ack_num}")
                     # send another segment (base + window_size) if necessary
                     if self.base + self.window_size < len(segments):
                         segment = segments[self.base + self.window_size]
@@ -196,34 +200,46 @@ class Client:
         response = ''
         flags = 24
 
-        while time.time() - start_time < 15 and flags not in [25, 17]:  # Stop if FIN or RST flags
-            try:
-                print("now in try statement for process_response_segments")
-                frame = self.client_socket.recv(self.frame_size)
-                frame_bytes = IPHeader.from_bytes(frame)
-                if frame_bytes.ip_daddr == self.client_ip:
-                    datagram_fields = HTTPDatagram.from_bytes(frame)
-                    print(f"datagram_fields in process_response_segments: {datagram_fields}")
-                    if datagram_fields.next_hop == self.client_ip and datagram_fields.flags in [17, 24, 25]:
-                        print("now in if statement for datagram_fields.next_hop == self.client_ip and datagram_fields.flags in [17, 24, 25]")
-                        if datagram_fields.seq_num == self.ack_num:
-                            print("now in if statement for datagram_fields.seq_num == self.ack_num")
-                            self.ack_num += 1
-                            response += datagram_fields.data
-                            flags = datagram_fields.flags
+        cum_ack_time_window = .25
 
-                        # Send ACK
-                        ack = HTTPDatagram(
-                            source_ip=self.client_ip, dest_ip=datagram_fields.ip_saddr,
-                            source_port=self.client_port, dest_port=datagram_fields.source_port,
-                            seq_num=self.seq_num, ack_num=self.ack_num,
-                            flags=16, window_size=self.window_size, next_hop=self.gateway, data='ACK'
-                        )
-                        print(f"ack in process_response_segments: {ack}")
-                        self.client_socket.sendto(ack.to_bytes(), (self.gateway, 0))
+        while time.time() - start_time < 120 and flags not in [25, 17]:  # Stop if FIN or RST flags
+            new_start_time = time.time()
+            while time.time()-new_start_time < cum_ack_time_window and flags != 25:
+                try:
+                    print("now in try statement for process_response_segments")
+                    frame = self.client_socket.recv(self.frame_size)
+                    frame_bytes = IPHeader.from_bytes(frame)
+                    if frame_bytes.ip_daddr == self.client_ip:
+                        datagram_fields = HTTPDatagram.from_bytes(frame)
+                        #print(f"datagram_fields in process_response_segments: {datagram_fields}")
+                        if datagram_fields.next_hop == self.client_ip and datagram_fields.flags in [17, 24, 25]:
+                            print("now in if statement for datagram_fields.next_hop == self.client_ip and datagram_fields.flags in [17, 24, 25]")
+                            if datagram_fields.seq_num == self.ack_num:
+                                print("now in if statement for datagram_fields.seq_num == self.ack_num")
+                                print(f"CLIENT: datagram_fields.seq_num:{datagram_fields.seq_num} and self.ack_num: {self.ack_num}")
+                                self.ack_num += 1
+                                print(f"CLIENT: after adding to self.ack_num: {self.ack_num}")
+                                response += self.f.decrypt((datagram_fields.data.encode()))
+                                print(f"\n!!!!!!CLIENT: after receiving encrypted data and decrypting: {self.f.decrypt((datagram_fields.data.encode()))}")
+                                print(f"!!!!!!\nCLIENT: after adding to self.ack_num: {datagram_fields.data}\n")
+                                flags = datagram_fields.flags
+
+                            # Send ACK
+                            ack = HTTPDatagram(
+                                source_ip=self.client_ip, dest_ip=datagram_fields.ip_saddr,
+                                source_port=self.client_port, dest_port=datagram_fields.source_port,
+                                seq_num=self.seq_num, ack_num=self.ack_num,
+                                flags=16, window_size=self.window_size, next_hop=self.gateway, data='ACK'
+                            )
+                            #print(f"ack in process_response_segments: {ack}")
+                except Exception as e:
+                    print(f'Error while receiving response: {e}')
+                    continue
+            try:
+                print(f"\n****CLIENT: sending ack w value: {self.ack_num}  *****")
+                self.client_socket.sendto(ack.to_bytes(), (self.gateway, 0))
             except Exception as e:
-                print(f'Error while receiving response: {e}')
-                continue
+                print(f'Error: ran out of time for cum ack: {e}')
         return response
 
     def close_socket(self):
